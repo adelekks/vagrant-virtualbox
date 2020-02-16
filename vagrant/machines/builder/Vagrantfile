@@ -1,0 +1,46 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.define "controller" do |controller|
+    controller.vm.box = "centos/7"
+    #controller.vm.network "private_network", ip: "192.168.56.9", nic_type: "virtio"
+    controller.vm.network "private_network", ip: "192.168.56.9"
+    controller.ssh.insert_key = false
+    controller.vm.synced_folder ".", "/vagrant", disabled: true
+    controller.vm.provider "virtualbox" do |vb|
+      vb.name = 'controller'
+      # Display the VirtualBox GUI when booting the machine
+      vb.gui = false
+      # Customize the amount of memory on the VM:
+      vb.memory = 4096
+      vb.cpus = 2
+      # enable promiscuous mode on the public network
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    end
+    controller.vm.provision "shell", inline: <<-SHELL
+      ifup eth1
+    SHELL
+  end
+
+  config.vm.define "compute" do |compute|
+    compute.vm.box = "centos/7"
+    #compute.vm.network "private_network", ip: "192.168.56.10", nic_type: "virtio"
+    compute.vm.network "private_network", ip: "192.168.56.10"
+    compute.ssh.insert_key = false
+    compute.vm.synced_folder ".", "/vagrant", disabled: true
+    compute.vm.provider "virtualbox" do |vb|
+      vb.name = 'compute'
+      # Display the VirtualBox GUI when booting the machine
+      vb.gui = false
+      # Customize the amount of memory on the VM:
+      vb.memory = 4096
+      vb.cpus = 2
+      # enable promiscuous mode on the public network
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    end
+    compute.vm.provision "shell", inline: <<-SHELL
+      ifup eth1
+    SHELL
+  end
+end
